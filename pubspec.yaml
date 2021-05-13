@@ -8,7 +8,7 @@ environment:
 
 dependencies:
   dart_base45: ^1.0.0
-  dart_cose: ^1.0.2
+  dart_cose: ../dart_cose
   cbor: ^4.0.1
 
 dev_dependencies:

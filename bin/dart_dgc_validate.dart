@@ -41,39 +41,52 @@ String extractKid(List<int> cose) {
 
   // extract the useful information.
   final protectedHeader = items[0];
+  final unprotectedHeader = items[1];
 
+  var kid;
   // parse headers.
   var headers = Cbor();
   headers.decodeFromBuffer(protectedHeader);
   var headerList = headers.getDecodedData();
-  if (headerList == null) {
-    return 'nokid';
+  if (headerList != null) {
+    var header = headerList.first;
+    kid = header[HeaderParameters['kid']];
   }
-  var header = headerList.first;
 
-  var kid = header[HeaderParameters['kid']];
-  if (null != kid) {
-    var bkid = base64.encode(kid);
-    return bkid;
+  // kid could not be retreived from protected header.
+  kid ??= unprotectedHeader[HeaderParameters['kid']];
+
+  if (null == kid) {
+    throw Exception('kid could not be extracted');
   }
-  return 'nokid';
+
+  var bkid = base64.encode(kid);
+  return bkid;
 }
 
 Future main(List<String> arguments) {
-  Directory dir = Directory('dgc-testdata');
-  List<FileSystemEntity> entries = dir.listSync(recursive: true).toList();
+  var dir = Directory('dgc-testdata');
+  var entries = dir.listSync(recursive: true).toList();
 
-  int count = 0;
-  int success = 0;
+  var count = 0;
+  var invalid = 0;
+  var success = 0;
 
   entries.where((element) => element.path.endsWith('.json')).forEach((element) {
     print(element);
-    count++;
 
     Map testfile;
 
     try {
-      testfile = jsonDecode(File.fromUri(element.uri).readAsStringSync());
+      try {
+        testfile = jsonDecode(File.fromUri(element.uri).readAsStringSync());
+        count++;
+      } on Exception catch (e) {
+        invalid++;
+        print(e);
+        print('!!! JSON INVALID');
+        return;
+      }
       var cose = unChain(testfile['PREFIX']);
       var kid = extractKid(cose);
 
@@ -88,14 +101,14 @@ Future main(List<String> arguments) {
           success++;
           print('SUCCESS VERIFIED');
         } else {
-          print('FAIL');
+          print('FAIL: expected verification');
         }
       } else {
         if (!result1.verified) {
           success++;
           print('SUCCESS UNVERIFIED');
         } else {
-          print('FAIL');
+          print('FAIL expected unverified');
         }
       }
     } on Exception catch (e) {
@@ -119,5 +132,6 @@ Future main(List<String> arguments) {
     }
   });
 
-  print("Ran $count tests of which $success succesfully.");
+  print(
+      "Ran $count tests of which $success succesfully. $invalid invalid test spec files.");
 }
