@@ -34,9 +34,9 @@ List<int> unChain(String input) {
 String extractKid(List<int> cose) {
   var inst = Cbor();
   inst.decodeFromList(cose);
-  List data = inst.getDecodedData();
+  List? data = inst.getDecodedData();
   // take the first element
-  var element = data.first;
+  var element = data!.first;
   List items = element as List;
 
   // extract the useful information.
@@ -64,7 +64,7 @@ String extractKid(List<int> cose) {
   return bkid;
 }
 
-Future main(List<String> arguments) {
+void main(List<String> arguments) {
   var dir = Directory('dgc-testdata');
   var entries = dir.listSync(recursive: true).toList();
 
@@ -73,9 +73,7 @@ Future main(List<String> arguments) {
   var success = 0;
 
   entries.where((element) => element.path.endsWith('.json')).forEach((element) {
-    print(element);
-
-    Map testfile;
+    Map? testfile;
 
     try {
       try {
@@ -87,7 +85,42 @@ Future main(List<String> arguments) {
         print('!!! JSON INVALID');
         return;
       }
-      var cose = unChain(testfile['PREFIX']);
+
+      var expectedResults = testfile!['EXPECTEDRESULTS'];
+      bool expectedValidObject =
+          expectedResults['EXPECTEDVALIDOBJECT'] ?? false;
+      bool expectedSchemaValidation =
+          expectedResults['EXPECTEDSCHEMAVALIDATION'] ?? false;
+      bool expectedDecode = expectedResults['EXPECTEDDECODE'] ?? false;
+      bool expectedVerify = expectedResults['EXPECTEDVERIFY'] ?? false;
+      bool expectedUnprefix = expectedResults['EXPECTEDUNPREFIX'] ?? false;
+      bool expectedDecompression =
+          expectedResults['EXPECTEDCOMPRESSION'] ?? false;
+      bool expectedBase45Decode = expectedResults['EXPECTEDB45DECODE'] ?? false;
+      bool expectedPictureDecode =
+          expectedResults['EXPECTEDPICTUREDECODE'] ?? false;
+
+      var input = testfile!['PREFIX'];
+      var unprefixed;
+      if (expectedUnprefix) {
+        if ('HC1' != input.substring(0, input.indexOf(':'))) {
+          print('INVALID PREFIX');
+        }
+        unprefixed = testfile['PREFIX'].substring(input.indexOf(':') + 1);
+      } else {
+        return; // process next file.
+      }
+
+      var cose;
+      try {
+        cose = unChain(testfile['PREFIX']);
+      } on Exception catch (e) {
+        print(e);
+        print('!!! UNCHAIN ISSUE');
+
+        return;
+      }
+
       var kid = extractKid(cose);
 
       // first decode to get the KID.
@@ -125,7 +158,7 @@ Future main(List<String> arguments) {
     } on Error catch (e) {
       print('ERROR');
       print(e);
-      if (!(testfile['EXPECTEDRESULTS']['EXPECTEDVERIFY'] ?? false)) {
+      if (!(testfile!['EXPECTEDRESULTS']['EXPECTEDVERIFY'] ?? false)) {
         success++;
         print('SUCCESS UNVERIFIED');
       }
