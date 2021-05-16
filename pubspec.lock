@@ -102,24 +102,24 @@ packages:
   crypto_keys:
     dependency: transitive
     description:
-      path: "../crypto_keys"
-      relative: true
-    source: path
+      name: crypto_keys
+      url: "https://pub.dartlang.org"
+    source: hosted
     version: "0.3.0"
   dart_base45:
     dependency: "direct main"
     description:
-      path: "../dart_base45"
-      relative: true
-    source: path
-    version: "1.0.0"
+      name: dart_base45
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.1"
   dart_cose:
     dependency: "direct main"
     description:
-      path: "../dart_cose"
-      relative: true
-    source: path
-    version: "1.0.2"
+      name: dart_cose
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.3"
   file:
     dependency: transitive
     description:
@@ -266,7 +266,7 @@ packages:
     source: hosted
     version: "1.11.0"
   pointycastle:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: pointycastle
       url: "https://pub.dartlang.org"
@@ -438,13 +438,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.0"
-  x509:
+  x509b:
     dependency: "direct main"
     description:
-      path: "../x509"
-      relative: true
-    source: path
-    version: "0.2.2"
+      name: x509b
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.2.3"
   yaml:
     dependency: transitive
     description:
