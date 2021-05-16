@@ -119,7 +119,7 @@ packages:
       path: "../dart_cose"
       relative: true
     source: path
-    version: "1.0.1"
+    version: "1.0.2"
   file:
     dependency: transitive
     description:
@@ -202,6 +202,41 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.0"
+  ninja:
+    dependency: "direct main"
+    description:
+      name: ninja
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.0.2"
+  ninja_asn1:
+    dependency: transitive
+    description:
+      name: ninja_asn1
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.0"
+  ninja_hex:
+    dependency: transitive
+    description:
+      name: ninja_hex
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.0"
+  ninja_pem:
+    dependency: transitive
+    description:
+      name: ninja_pem
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.0"
+  ninja_prime:
+    dependency: transitive
+    description:
+      name: ninja_prime
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.0"
   node_preamble:
     dependency: transitive
     description:
@@ -231,7 +266,7 @@ packages:
     source: hosted
     version: "1.11.0"
   pointycastle:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: pointycastle
       url: "https://pub.dartlang.org"

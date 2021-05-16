@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:test/test.dart';
 import 'package:convert/convert.dart';
@@ -44,19 +45,22 @@ String extractKid(List<int> cose) {
   final protectedHeader = items[0];
   final unprotectedHeader = items[1];
 
-  var kid;
+  var kidBuffer;
   // parse headers.
   var headers = Cbor();
   headers.decodeFromBuffer(protectedHeader);
   var headerList = headers.getDecodedData();
   if (headerList != null) {
     var header = headerList.first;
-    kid = header[HeaderParameters['kid']];
+    kidBuffer = header[HeaderParameters['kid']];
   }
 
   // kid could not be retreived from protected header.
-  kid ??= unprotectedHeader[HeaderParameters['kid']];
-
+  kidBuffer ??= unprotectedHeader[HeaderParameters['kid']];
+  var kid = Uint8List.view(kidBuffer.buffer, 0, kidBuffer.length);
+  if (kid.length > 8) {
+    kid = kid.sublist(0, 8);
+  }
   if (null == kid) {
     throw Exception('kid could not be extracted');
   }
@@ -71,17 +75,8 @@ void main() {
   var dir = Directory('dgc-testdata');
   var entries = dir.listSync(recursive: true).toList();
 
-  entries
-      .where((element) => element.path.endsWith('.json'))
-      .where((element) => !element.path
-          .contains('common\\2DCode\\raw\\CO1.json')) // invalid algorithm
-      .where((element) => !element.path
-          .contains('common\\2DCode\\raw\\CO2.json')) // invalid algorithm
-      .where((element) => !element.path.contains(
-          'common\\2DCode\\raw\\CO22.json')) // invalid spec, verify succeeds (kid mismatch check? TODO?)
-      .where((element) => !element.path.contains(
-          'common\\2DCode\\raw\\CO23.json')) // invalid spec, verify succeeds (kid mismatch check? TODO?)
-      //.where((element) => element.path.contains('ES'))
+  entries.where((element) => element.path.endsWith('.json'))
+      //.where((element) => element.path.contains('ES\\2DCode\\raw\\101.json'))
       .forEach((element) {
     test(element, () {
       //print(element);
