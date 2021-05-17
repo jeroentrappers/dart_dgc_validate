@@ -75,8 +75,9 @@ void main() {
   var dir = Directory('dgc-testdata');
   var entries = dir.listSync(recursive: true).toList();
 
-  entries.where((element) => element.path.endsWith('.json'))
-      //.where((element) => element.path.contains('ES\\2DCode\\raw\\101.json'))
+  entries
+      .where((element) => element.path.endsWith('.json'))
+      .where((element) => element.path.contains('BE'))
       .forEach((element) {
     test(element, () {
       //print(element);
