@@ -77,7 +77,6 @@ void main() {
 
   entries
       .where((element) => element.path.endsWith('.json'))
-      .where((element) => element.path.contains('BE'))
       .forEach((element) {
     test(element, () {
       //print(element);
