@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:convert';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:asn1lib/asn1lib.dart';
@@ -14,6 +15,11 @@ import 'package:x509b/x509.dart';
 
 const _KID_HEADER = 4;
 
+enum DCCType{
+  vaccination,
+  test,
+  recovery
+}
 
 List<int> unChain(String input) {
   // trim HC1
@@ -162,6 +168,8 @@ void main() {
 
       try {
         try {
+          print('----');
+          print(element.uri);
           testfile = jsonDecode(File.fromUri(element.uri).readAsStringSync());
         } on Exception catch (e) {
           print(e);
@@ -178,6 +186,7 @@ void main() {
         bool? expectedDecompression = expectedResults['EXPECTEDCOMPRESSION'];
         bool? expectedBase45Decode = expectedResults['EXPECTEDB45DECODE'];
         bool? expectedPictureDecode = expectedResults['EXPECTEDPICTUREDECODE'];
+        bool? expectedKeyUsage = expectedResults['EXPECTEDKEYUSAGE'];
 
         var unprefixed; // output of next step
         var input;
@@ -221,7 +230,7 @@ void main() {
             var expected = testfile['COMPRESSED'];
             if (null == expected) {
               print(
-                  'Illegal spec: expected base45 decode, but COMPRESSED input missing.: ' +
+                  'Warning: Invalid spec: expected base45 decode, but COMPRESSED input missing.: ' +
                       element.toString());
             } else {
               expected = expected.toString().toLowerCase();
@@ -246,6 +255,10 @@ void main() {
           // PROCESS DECOMPRESSION
           try {
             cose = zlib.decode(compressedCose);
+
+            if( compressedCose.length > cose.length ){
+              print('Warning: useless compression. Compressed size (${compressedCose.length}) is larger than raw COSE (${cose.length}).');
+            }
           } on Exception catch (e) {
             print(e);
             if (expectedDecompression) {
@@ -265,6 +278,7 @@ void main() {
           }
         }
 
+        var types = new List<DCCType>.empty(growable: true);
         if (expectedDecode != null) {
           try {
             var cbor = hex.decode(testfile['CBOR']);
@@ -280,6 +294,17 @@ void main() {
             if (expectedDecode) {
               expect(result[-260][1], testfile['JSON'],
                   reason: 'json mismatch');
+
+              var dgc = result[-260][1] as Map;
+              if( dgc.containsKey('v')){
+                types.add(DCCType.vaccination);
+              }
+              else if( dgc.containsKey('t')){
+                types.add(DCCType.test);
+              }
+              else if( dgc.containsKey('r')){
+                types.add(DCCType.recovery);
+              }
             } else {
               expect(result, null);
               return; // next file
@@ -298,8 +323,9 @@ void main() {
           cose = zlib.decode(compressedCose);
         }
 
+        CoseResult result1;
         if (expectedVerify != null) {
-          CoseResult result1;
+
           try {
             var kid = extractKid(cose);
 
@@ -326,6 +352,28 @@ void main() {
             }
           }
         }
+
+        // check if the certificate has extensions enabled.
+        X509Certificate cert = X509Certificate.fromAsn1(ASN1Sequence.fromBytes( base64Decode(testfile['TESTCTX']['CERTIFICATE'])));
+        if( (cert.tbsCertificate.extensions?.length ?? 0) > 0) {
+          //print(cert);
+          //print('Allowed issuers:');
+          var allowed =
+          cert.tbsCertificate.extensions?.where((e) => e.extnId.name == 'extKeyUsage')
+          .map((e) => e.extnValue).cast<ExtendedKeyUsage>().expand((e) => e.ids).toList(growable: false);
+
+          if( null != allowed && allowed.length > 0 && expectedKeyUsage != null ){
+            if( types.contains(DCCType.vaccination)){
+              expect(allowed.where((oid) => oid.name == 'Vaccination Issuers').isNotEmpty, expectedKeyUsage,reason: 'Key does not support signing vaccination DCCs. Allowed: ' + allowed.toString());
+            }
+            if( types.contains(DCCType.test)){
+              expect(allowed.where((oid) => oid.name == 'Test Issuers').isNotEmpty, expectedKeyUsage, reason: 'Key does not support signing test DCCs. Allowed: ' + allowed.toString());
+            }
+            if( types.contains(DCCType.recovery)){
+              expect(allowed.where((oid) => oid.name == 'Recovery Issuers').isNotEmpty, expectedKeyUsage, reason: 'Key does not support recovery DCCs. Allowed: ' + allowed.toString());
+            }
+          }
+        }
       } on Exception catch (e) {
         print('EXCEPTION');
         print(e);
@@ -344,6 +392,7 @@ void main() {
 
 
   test('trust', () async {
+    return; // diable test.
     var trustrootpem = '''-----BEGIN CERTIFICATE-----
 MIIFQTCCAymgAwIBAgIULTspcOgGgEEdJECdg/XQe4gDp5kwDQYJKoZIhvcNAQEL
 BQAwUjELMAkGA1UEBhMCQkUxFzAVBgNVBAoTDkV1cm9wZWFuIFVuaW9uMSowKAYD
