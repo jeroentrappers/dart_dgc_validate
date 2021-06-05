@@ -7,14 +7,14 @@ packages:
       name: _fe_analyzer_shared
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "21.0.0"
+    version: "22.0.0"
   analyzer:
     dependency: transitive
     description:
       name: analyzer
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.5.0"
+    version: "1.7.1"
   args:
     dependency: transitive
     description:
@@ -23,7 +23,7 @@ packages:
     source: hosted
     version: "2.1.0"
   asn1lib:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: asn1lib
       url: "https://pub.dartlang.org"
@@ -35,7 +35,7 @@ packages:
       name: async
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.6.1"
+    version: "2.7.0"
   boolean_selector:
     dependency: transitive
     description:
@@ -49,7 +49,7 @@ packages:
       name: cbor
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.0.1"
+    version: "4.0.2"
   characters:
     dependency: transitive
     description:
@@ -91,7 +91,7 @@ packages:
       name: coverage
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.2"
+    version: "1.0.3"
   crypto:
     dependency: transitive
     description:
@@ -116,17 +116,17 @@ packages:
   dart_cose:
     dependency: "direct main"
     description:
-      name: dart_cose
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.0.3"
+      path: "../dart_cose"
+      relative: true
+    source: path
+    version: "1.1.1"
   file:
     dependency: transitive
     description:
       name: file
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "6.1.0"
+    version: "6.1.1"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -381,7 +381,7 @@ packages:
       name: test
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.17.4"
+    version: "1.17.5"
   test_api:
     dependency: transitive
     description:
@@ -395,7 +395,7 @@ packages:
       name: test_core
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.3.24"
+    version: "0.3.25"
   typed_data:
     dependency: transitive
     description:
@@ -416,7 +416,7 @@ packages:
       name: vm_service
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "6.2.0"
+    version: "7.0.0"
   watcher:
     dependency: transitive
     description:
@@ -441,10 +441,10 @@ packages:
   x509b:
     dependency: "direct main"
     description:
-      name: x509b
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.2.3"
+      path: "../x509"
+      relative: true
+    source: path
+    version: "0.2.4"
   yaml:
     dependency: transitive
     description:
